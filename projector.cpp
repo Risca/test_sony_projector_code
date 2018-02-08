@@ -2,6 +2,8 @@
 #include "serial.h"
 
 #define START_CODE ((char)0xA9)
+#define ON_CODE    ((char)0x2E)
+#define OFF_CODE   ((char)0x2F)
 #define END_CODE   ((char)0x9A)
 
 static ProjectorState ParseStateResponse(char buf[8])
@@ -19,6 +21,20 @@ static ProjectorState ParseStateResponse(char buf[8])
   return STATE_UNKNOWN;
 }
 
+static ProjectorState ChangePowerState(bool on)
+{
+  const ProjectorState wantedState = on ? STATE_POWER_ON : STATE_STANDBY;
+  char buf[8] = {START_CODE, 0x17, (on ? ON_CODE : OFF_CODE), 0x00, 0x00, 0x00, 0x3F, END_CODE };
+  ProjectorState state = GetProjectorState();
+  if (state != wantedState) {
+    if (Serial0.write(buf, 8) == 8) {
+      do {
+        state = GetProjectorState();
+      } while (!(state == wantedState || state == STATE_UNKNOWN));
+    }
+  }
+}
+
 ProjectorState GetProjectorState()
 {
   char buf[8] = { START_CODE, 0x01, 0x02, 0x01, 0x00, 0x00, 0x03, END_CODE };
@@ -32,13 +48,15 @@ ProjectorState GetProjectorState()
 
 void TurnOnProjector()
 {
-  Serial0.print("Turning ON projector... ");
-  Serial0.println("done.");
+  Serial.print("Turning ON projector... ");
+  const ProjectorState state = ChangePowerState(true);
+  Serial.println(state == STATE_POWER_ON ? "done." : "error!");
 }
 
 void TurnOffProjector()
 {
-  Serial0.print("Turning OFF projector... ");
-  Serial0.println("done.");
+  Serial.print("Turning OFF projector... ");
+  const ProjectorState state = ChangePowerState(false);
+  Serial.println(state == STATE_STANDBY ? "done." : "error!");
 }
 
