@@ -17,7 +17,7 @@ GMOCK_DIR := $(GTEST_TOPDIR)/googlemock
 GMOCK_SRC := $(GMOCK_DIR)/src/gmock-all.cc
 GMOCK_LIB := $(BUILDDIR)/libgmock.a
 
-TEST_CXXFLAGS := -isystem $(GTEST_DIR)/include -isystem $(GMOCK_DIR)/include -pthread -I$(TOPDIR) -g
+TEST_CXXFLAGS := -isystem $(GTEST_DIR)/include -isystem $(GMOCK_DIR)/include -pthread -I$(TOPDIR) -g -std=c++11
 TEST_LDFLAGS := -pthread -Wl,-rpath=$(BUILDDIR) -L$(LIBDIR) -ldotdetector $(GMOCK_LIB) $(LIBS)
 
 #vpath %.cpp $(TOPDIR)
