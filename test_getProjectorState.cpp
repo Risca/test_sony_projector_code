@@ -41,23 +41,28 @@ TEST_F(ProjectorStateTest, SerialTimeout)
 {
 	EXPECT_CALL(*SerialProxy::g_Instance, readBytes(NotNull(), 8))
 		.WillOnce(Return(0));
-	EXPECT_EQ(GetProjectorState(), 0);
+	EXPECT_EQ(GetProjectorState(), STATE_UNKNOWN);
 }
 
 TEST_P(ProjectorStateTest, WrongByte)
 {
-	byte b = GetParam();
+	int b = GetParam();
 	char response[9] = { 0xA9, 0x01, 0x02, 0x02, 0x00, 0x00, 0x03, 0x9A, 0x00 };
 	response[b] = 0xFF;
 	EXPECT_CALL(*SerialProxy::g_Instance, readBytes(NotNull(), 8))
 		.WillOnce(DoAll(SetArrayArgument<0>(&response[0], &response[8]),
 				Return(8)));
-	EXPECT_EQ(GetProjectorState(), 0);
+	if (b < 8) {
+		EXPECT_EQ(GetProjectorState(), STATE_UNKNOWN);
+	}
+	else {
+		EXPECT_EQ(GetProjectorState(), static_cast<ProjectorState>(0));
+	}
 }
 
 TEST_P(ProjectorStateTest, Ok)
 {
-	byte state = GetParam();
+	ProjectorState state = static_cast<ProjectorState>(GetParam());
 	char response[8] = { 0xA9, 0x01, 0x02, 0x02, 0x00, state, 0x03 | state, 0x9A };
 	EXPECT_CALL(*SerialProxy::g_Instance, readBytes(NotNull(), 8))
 		.WillOnce(DoAll(SetArrayArgument<0>(&response[0], &response[8]),
