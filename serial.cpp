@@ -31,5 +31,6 @@ size_t SerialProxy::write(char buf[], int len)
 }
 
 SerialMock* SerialProxy::g_Instance = 0;
+SerialProxy Serial;
 SerialProxy Serial0;
 

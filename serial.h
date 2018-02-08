@@ -39,5 +39,5 @@ struct SerialProxy : public ISerial
 	size_t write(char buf[], int len);
 };
 
+extern SerialProxy Serial;
 extern SerialProxy Serial0;
-
